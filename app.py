@@ -61,21 +61,40 @@ def main():
     )
 
     
+   
     st.markdown("""
-       <style>
+        <style>
         * {
             border-radius: 0px !important;
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', monospace, sans-serif !important;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
         }
-        .stApp {
-            background-color: #ffffff;
-            color: #000000;
+        
+        .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+            background-color: #ffffff !important;
+            color: #000000 !important;
         }
-        div[data-baseweb="select"] > div,
-        div[data-baseweb="input"] > div {
-            border: 1px solid #000000 !important;
+      
+        p, span, label, div, pre, code, h1, h2, h3 {
+            color: #000000 !important;
+        }
+       
+        div[data-baseweb="select"] > div {
+            border: 1.5px solid #000000 !important;
             background-color: #f8f8f8 !important;
             color: #000000 !important;
+        }
+       
+        div[data-baseweb="input"] > div, input {
+            border: 1.5px solid #000000 !important;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+        }
+       
+        button[data-testid="stNumberInputStepDown"], button[data-testid="stNumberInputStepUp"] {
+            background-color: #e0e0e0 !important;
+            color: #000000 !important;
+            border-left: 1px solid #000000 !important;
         }
       
         .stButton > button {
@@ -90,11 +109,12 @@ def main():
         .stButton > button:hover {
             background-color: #cccccc !important;
         }
-       
+      
         .plain-box {
-            border: 1px solid #000000;
+            border: 1.5px solid #000000 !important;
             padding: 15px;
-            background-color: #f4f4f4;
+            background-color: #f4f4f4 !important;
+            color: #000000 !important;
             margin-top: 10px;
             line-height: 1.8;
             font-size: 15px;
