@@ -32,7 +32,7 @@ TEXTS = {
     "res_all_grade": "예상 성취도: {grade} 등급",
     "res_target_title": "[{target_name}] 목표 성취도별 필요 점수",
     "grade_achievable": "- 성취도 {grade} ({cut}점 이상): {req_score:.1f}점 이상 필요",
-    "grade_already": "- 성취도 {grade}** ({cut}점 이상): 달성 확정 (0점 받아도 가능)",
+    "grade_already": "- 성취도 {grade} ({cut}점 이상): 달성 확정 (0점 받아도 가능)",
     "grade_impossible": "- 성취도 {grade} ({cut}점 이상): 달성 불가 (100점 만점 받아도 {max_possible:.1f}점)",
     "feedback_text": "오류 제보 및 개선 의견 보내기 (구글폼)",
     "feedback_url": "https://forms.gle/mHbY6hAJNQpotsDS8",
