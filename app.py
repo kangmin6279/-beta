@@ -86,7 +86,7 @@ def main():
        
         .stApp, [data-testid="stAppViewContainer"] {{
             background-color: #ffffff !important;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.25)), url("data:image/png;base64,{img_base64}");
+            background-image: linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15)), url("data:image/png;base64,{img_base64}");
             background-size: contain;        
             background-position: right bottom; 
             background-repeat: no-repeat;
