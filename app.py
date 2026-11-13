@@ -1,4 +1,5 @@
 import streamlit as st
+import base64
 
 
 SUBJECT_WEIGHTS = {
@@ -13,7 +14,7 @@ SUBJECT_WEIGHTS = {
 
 
 TEXTS = {
-    "page_title": "한강민 성적 계산기(베타)",
+    "page_title": "치이카와 성적 계산기(베타)",
     "main_title": "충암중학교 성취도 계산기(베타)",
     "sub_title": "과목을 선택하고 점수를 입력하시오. (2개 이상 입력 시 목표 점수 계산)",
     "select_subject": "1. 과목 선택",
@@ -55,49 +56,86 @@ def main():
     
     st.set_page_config(
         page_title=TEXTS["page_title"],
-        page_icon="🧮",
+        page_icon="🇷🇺",
         layout="centered",
         initial_sidebar_state="collapsed"
     )
 
     
    
-    st.markdown("""
+   
+    def get_base64_img(image_file):
+        try:
+            with open(image_file, "rb") as f:
+                return base64.b64encode(f.read()).decode()
+        except FileNotFoundError:
+            return ""
+
+    img_base64 = get_base64_img("bg.png")
+
+
+    st.markdown(f"""
         <style>
-        * {
+        * {{
             border-radius: 0px !important;
             font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif !important;
-        }
-        
-        .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-        }
-      
-        p, span, label, div, pre, code, h1, h2, h3 {
-            color: #000000 !important;
-        }
+        }}
        
-        div[data-baseweb="select"] > div {
+        .stApp, [data-testid="stAppViewContainer"] {{
+            background-color: #ffffff !important;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.72)), url("data:image/png;base64,{img_base64}");
+            background-size: contain;        
+            background-position: right bottom; 
+            background-repeat: no-repeat;
+            background-attachment: fixed;   
+        }}
+        [data-testid="stHeader"] {{
+            background-color: transparent !important;
+        }}
+       
+        .block-container {{
+            background-color: rgba(255, 255, 255, 0.85) !important;
+            border: 1.5px solid #000000 !important;
+            padding: 2rem 1.5rem !important;
+            margin-top: 2rem !important;
+            margin-bottom: 2rem !important;
+        }}
+        
+        @media (max-width: 768px) {{
+            .stApp, [data-testid="stAppViewContainer"] {{
+                background-size: 75% auto;      
+                background-position: center bottom; 
+            }}
+            .block-container {{
+                margin-top: 1rem !important;
+                padding: 1.2rem 1rem !important;
+            }}
+        }}
+       
+        p, span, label, pre, code, h1, h2, h3 {{
+            color: #000000 !important;
+        }}
+        div[data-baseweb="select"] > div {{
             border: 1.5px solid #000000 !important;
             background-color: #f8f8f8 !important;
             color: #000000 !important;
-        }
-       
-        div[data-baseweb="input"] > div, input {
+        }}
+        div[data-baseweb="input"] {{
             border: 1.5px solid #000000 !important;
+            background-color: #ffffff !important;
+        }}
+        input {{
             background-color: #ffffff !important;
             color: #000000 !important;
             -webkit-text-fill-color: #000000 !important;
-        }
-       
-        button[data-testid="stNumberInputStepDown"], button[data-testid="stNumberInputStepUp"] {
+        }}
+        button[data-testid="stNumberInputStepDown"], button[data-testid="stNumberInputStepUp"] {{
             background-color: #e0e0e0 !important;
             color: #000000 !important;
             border-left: 1px solid #000000 !important;
-        }
-      
-        .stButton > button {
+            pointer-events: auto !important;
+        }}
+        .stButton > button {{
             width: 100%;
             height: 45px;
             background-color: #e0e0e0 !important;
@@ -105,12 +143,11 @@ def main():
             border: 2px solid #000000 !important;
             font-weight: bold !important;
             font-size: 16px !important;
-        }
-        .stButton > button:hover {
+        }}
+        .stButton > button:hover {{
             background-color: #cccccc !important;
-        }
-      
-        .plain-box {
+        }}
+        .plain-box {{
             border: 1.5px solid #000000 !important;
             padding: 15px;
             background-color: #f4f4f4 !important;
@@ -118,7 +155,7 @@ def main():
             margin-top: 10px;
             line-height: 1.8;
             font-size: 15px;
-        }
+        }}
         </style>
     """, unsafe_allow_html=True)
 
@@ -171,7 +208,7 @@ def main():
             st.markdown(f"<div class='plain-box'><b>{TEXTS['err_less_than_2']}</b></div>", unsafe_allow_html=True)
             return
 
-        # Case A: 3개 모두 입력
+
         if checked_count == 3:
             total_score = (mid_score * w_mid) + (final_score * w_final) + (perf_score * w_perf)
             rounded_score = int(total_score + 0.5)
@@ -186,7 +223,7 @@ def main():
             """
             st.markdown(result_html, unsafe_allow_html=True)
 
-        # Case B: 2개만 입력
+       
         elif checked_count == 2:
             current_score = 0.0
             target_weight = 0.0
