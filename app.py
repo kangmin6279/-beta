@@ -13,9 +13,9 @@ SUBJECT_WEIGHTS = {
 
 
 TEXTS = {
-    "page_title": "한강민 성적 계산기",
-    "main_title": "2학년 성취도 계산기",
-    "sub_title": "과목을 선택하고 점수를 입력하세요. (2개 이상 입력 시 목표 점수 계산)",
+    "page_title": "한강민 성적 계산기(베타)",
+    "main_title": "충암중학교 성취도 계산기(베타)",
+    "sub_title": "과목을 선택하고 점수를 입력하시오. (2개 이상 입력 시 목표 점수 계산)",
     "select_subject": "1. 과목 선택",
     "weight_info": "반영 비율: 중간 {mid}% / 기말 {final}% / 수행 {perf}%",
     "weight_warning": "관리자가 아직 이 과목의 반영 비율을 설정하지 않았습니다.",
@@ -23,7 +23,7 @@ TEXTS = {
     "mid_label": "중간고사",
     "final_label": "기말고사",
     "perf_label": "수행평가",
-    "calc_button": "결과 확인하기",
+    "calc_button": "결과 확인",
     "err_less_than_2": "최소 2개 이상의 점수를 입력해야 계산할 수 있습니다.",
     "err_weight_zero": "계산하려는 항목의 반영 비율이 0%로 설정되어 있습니다.",
     "res_all_title": "예상 최종 성적 결과",
@@ -55,27 +55,56 @@ def main():
     
     st.set_page_config(
         page_title=TEXTS["page_title"],
-        page_icon="📊",
+        page_icon="🧮",
         layout="centered",
         initial_sidebar_state="collapsed"
     )
 
     
     st.markdown("""
-        <style>
-        .stButton>button {
+       <style>
+        * {
+            border-radius: 0px !important;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', monospace, sans-serif !important;
+        }
+        .stApp {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        div[data-baseweb="select"] > div,
+        div[data-baseweb="input"] > div {
+            border: 1px solid #000000 !important;
+            background-color: #f8f8f8 !important;
+            color: #000000 !important;
+        }
+      
+        .stButton > button {
             width: 100%;
-            height: 3em;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 10px;
+            height: 45px;
+            background-color: #e0e0e0 !important;
+            color: #000000 !important;
+            border: 2px solid #000000 !important;
+            font-weight: bold !important;
+            font-size: 16px !important;
+        }
+        .stButton > button:hover {
+            background-color: #cccccc !important;
+        }
+       
+        .plain-box {
+            border: 1px solid #000000;
+            padding: 15px;
+            background-color: #f4f4f4;
+            margin-top: 10px;
+            line-height: 1.8;
+            font-size: 15px;
         }
         </style>
     """, unsafe_allow_html=True)
 
-    st.title(TEXTS["main_title"])
-    st.caption(TEXTS["sub_title"])
-    st.divider()
+    st.markdown(f"## {TEXTS['main_title']}")
+    st.text(TEXTS["sub_title"])
+    st.markdown("---")
 
     
     subject = st.selectbox(TEXTS["select_subject"], list(SUBJECT_WEIGHTS.keys()))
@@ -83,16 +112,16 @@ def main():
     w_mid, w_final, w_perf = weights["mid"], weights["final"], weights["perf"]
 
     if w_mid + w_final + w_perf == 0:
-        st.warning(TEXTS["weight_warning"])
+        st.text(TEXTS["weight_warning"])
     else:
-        st.info(TEXTS["weight_info"].format(
+        st.text(TEXTS["weight_info"].format(
             mid=int(round(w_mid * 100)),
             final=int(round(w_final * 100)),
             perf=int(round(w_perf * 100))
         ))
 
-    st.subheader(TEXTS["input_guide"])
-
+    st.markdown("---")
+    st.markdown(f"**{TEXTS['input_guide']}**")
     
     col1, col2 = st.columns([1, 2])
     with col1:
@@ -104,36 +133,40 @@ def main():
     with col3:
         use_final = st.checkbox(TEXTS["final_label"], value=False)
     with col4:
-        final_score = st.number_input("기말 점수", min_value=0.0, max_value=100.0, value=0.0, step=0.5, disabled=not use_final, label_visibility="collapsed")
+        final_score = st.number_input("기말", min_value=0.0, max_value=100.0, value=0.0, step=0.5, disabled=not use_final, label_visibility="collapsed")
 
     col5, col6 = st.columns([1, 2])
     with col5:
         use_perf = st.checkbox(TEXTS["perf_label"], value=True)
     with col6:
-        perf_score = st.number_input("수행 점수", min_value=0.0, max_value=100.0, value=0.0, step=0.5, disabled=not use_perf, label_visibility="collapsed")
+        perf_score = st.number_input("수행", min_value=0.0, max_value=100.0, value=0.0, step=0.5, disabled=not use_perf, label_visibility="collapsed")
 
     st.write("")
 
     
-    if st.button(TEXTS["calc_button"], type="primary"):
+    if st.button(TEXTS["calc_button"]):
         checked_count = sum([use_mid, use_final, use_perf])
 
         if checked_count < 2:
-            st.error(TEXTS["err_less_than_2"])
+            st.markdown(f"<div class='plain-box'><b>{TEXTS['err_less_than_2']}</b></div>", unsafe_allow_html=True)
             return
 
-        
+        # Case A: 3개 모두 입력
         if checked_count == 3:
             total_score = (mid_score * w_mid) + (final_score * w_final) + (perf_score * w_perf)
-           
             rounded_score = int(total_score + 0.5)
             grade = get_grade(total_score)
 
-            st.success(TEXTS["res_all_title"])
-            st.markdown(TEXTS["res_all_score"].format(total=total_score, rounded=rounded_score))
-            st.markdown(f"### {TEXTS['res_all_grade'].format(grade=grade)}")
+            result_html = f"""
+            <div class='plain-box'>
+                <b>{TEXTS['res_all_title']}</b><br>
+                {TEXTS['res_all_score'].format(total=total_score, rounded=rounded_score)}<br>
+                <b>{TEXTS['res_all_grade'].format(grade=grade)}</b>
+            </div>
+            """
+            st.markdown(result_html, unsafe_allow_html=True)
 
-        
+        # Case B: 2개만 입력
         elif checked_count == 2:
             current_score = 0.0
             target_weight = 0.0
@@ -158,25 +191,28 @@ def main():
                 target_name = TEXTS["perf_label"]
 
             if target_weight <= 0:
-                st.error(TEXTS["err_weight_zero"])
+                st.markdown(f"<div class='plain-box'><b>{TEXTS['err_weight_zero']}</b></div>", unsafe_allow_html=True)
                 return
 
-            st.success(TEXTS["res_target_title"].format(target_name=target_name))
             max_possible = current_score + (100.0 * target_weight)
+            lines = [f"<b>{TEXTS['res_target_title'].format(target_name=target_name)}</b>"]
 
             for grade, cutoff in GRADE_CUTOFFS:
                 if grade == "E":
-                    st.markdown(TEXTS["grade_already"].format(grade=grade, cut=cutoff))
+                    lines.append(TEXTS["grade_already"].format(grade=grade, cut=cutoff))
                     continue
 
                 needed = (cutoff - current_score) / target_weight
 
                 if needed <= 0:
-                    st.markdown(TEXTS["grade_already"].format(grade=grade, cut=cutoff))
+                    lines.append(TEXTS["grade_already"].format(grade=grade, cut=cutoff))
                 elif needed > 100.0:
-                    st.markdown(TEXTS["grade_impossible"].format(grade=grade, cut=cutoff, max_possible=max_possible))
+                    lines.append(TEXTS["grade_impossible"].format(grade=grade, cut=cutoff, max_possible=max_possible))
                 else:
-                    st.markdown(TEXTS["grade_achievable"].format(grade=grade, cut=cutoff, req_score=needed))
+                    lines.append(TEXTS["grade_achievable"].format(grade=grade, cut=cutoff, req_score=needed))
+
+            result_html = "<div class='plain-box'>" + "<br>".join(lines) + "</div>"
+            st.markdown(result_html, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
