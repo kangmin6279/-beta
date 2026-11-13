@@ -34,6 +34,9 @@ TEXTS = {
     "grade_achievable": "- **성취도 {grade}** ({cut}점 이상): **{req_score:.1f}점** 이상 필요",
     "grade_already": "- **성취도 {grade}** ({cut}점 이상): **달성 확정** (0점 받아도 가능)",
     "grade_impossible": "- **성취도 {grade}** ({cut}점 이상): **달성 불가** (100점 만점 받아도 {max_possible:.1f}점)",
+    "feedback_text": "오류 제보 및 개선 의견 보내기 (구글폼)",
+    "feedback_url": "https://forms.gle/mHbY6hAJNQpotsDS8",
+
 }
 
 
@@ -270,6 +273,18 @@ def main():
 
             result_html = "<div class='plain-box'>" + "<br>".join(lines) + "</div>"
             st.markdown(result_html, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown(
+        f"""
+        <div style="text-align: center; margin-top: 15px; margin-bottom: 10px;">
+            <a href="{TEXTS['feedback_url']}" target="_blank" style="color: #000000; text-decoration: underline; font-weight: bold; font-size: 14px;">
+                {TEXTS['feedback_text']}
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 if __name__ == "__main__":
     main()
