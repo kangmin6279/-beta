@@ -97,7 +97,7 @@ def main():
         }}
        
         .block-container {{
-            background-color: rgba(255, 255, 255, 0.85) !important;
+            background-color: rgba(255, 255, 255, 0.6) !important;
             border: 1.5px solid #000000 !important;
             padding: 2rem 1.5rem !important;
             margin-top: 2rem !important;
