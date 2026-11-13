@@ -20,10 +20,10 @@ TEXTS = {
     "select_subject": "1. 과목 선택",
     "weight_info": "반영 비율: 중간 {mid}% / 기말 {final}% / 수행 {perf}%",
     "weight_warning": "관리자가 아직 이 과목의 반영 비율을 설정하지 않았습니다.",
-    "input_guide": "2. 점수 입력 (100점 만점 기준, 미응시/미정 과목은 체크 해제)",
+   "input_guide": "점수 입력 (지필은 100점 만점, 수행은 반영비율 만점 기준)",
     "mid_label": "중간고사",
     "final_label": "기말고사",
-    "perf_label": "수행평가",
+    "perf_label": "수행평가 ({max_perf}점 만점)",
     "calc_button": "결과 확인",
     "err_less_than_2": "최소 2개 이상의 점수를 입력해야 계산할 수 있습니다.",
     "err_weight_zero": "계산하려는 항목의 반영 비율이 0%로 설정되어 있습니다.",
@@ -183,27 +183,41 @@ def main():
     st.markdown("---")
     st.markdown(f"**{TEXTS['input_guide']}**")
     
-    col1, col2 = st.columns([1, 2])
+# 수행평가 만점 계산 (예: 0.40 -> 40.0점 만점)
+    max_perf_score = round(w_perf * 100, 2)
+    perf_label_text = TEXTS["perf_label"].format(max_perf=int(max_perf_score) if max_perf_score.is_integer() else max_perf_score)
+
+    # 2. 점수 입력
+    col1, col2 = st.columns([1.2, 1.8])
     with col1:
         use_mid = st.checkbox(TEXTS["mid_label"], value=True)
     with col2:
-        mid_score = st.number_input("중간 점수", min_value=0.0, max_value=100.0, value=0.0, step=0.5, disabled=not use_mid, label_visibility="collapsed")
+        mid_score = st.number_input("중간", min_value=0.0, max_value=100.0, value=0.0, step=0.5, disabled=not use_mid, label_visibility="collapsed")
 
-    col3, col4 = st.columns([1, 2])
+    col3, col4 = st.columns([1.2, 1.8])
     with col3:
         use_final = st.checkbox(TEXTS["final_label"], value=False)
     with col4:
         final_score = st.number_input("기말", min_value=0.0, max_value=100.0, value=0.0, step=0.5, disabled=not use_final, label_visibility="collapsed")
 
-    col5, col6 = st.columns([1, 2])
+    col5, col6 = st.columns([1.2, 1.8])
     with col5:
-        use_perf = st.checkbox(TEXTS["perf_label"], value=True)
+        use_perf = st.checkbox(perf_label_text, value=True)
     with col6:
-        perf_score = st.number_input("수행", min_value=0.0, max_value=100.0, value=0.0, step=0.5, disabled=not use_perf, label_visibility="collapsed")
+        # 수행평가는 해당 과목의 반영 비율 점수가 곧 최댓값(max_value)
+        perf_score = st.number_input(
+            "수행",
+            min_value=0.0,
+            max_value=float(max_perf_score) if max_perf_score > 0 else 100.0,
+            value=0.0,
+            step=0.5,
+            disabled=not use_perf,
+            label_visibility="collapsed"
+        )
 
     st.write("")
 
-    
+    # 3. 계산 실행
     if st.button(TEXTS["calc_button"]):
         checked_count = sum([use_mid, use_final, use_perf])
 
@@ -211,9 +225,9 @@ def main():
             st.markdown(f"<div class='plain-box'><b>{TEXTS['err_less_than_2']}</b></div>", unsafe_allow_html=True)
             return
 
-
+        # Case A: 3개 모두 입력 (수행평가는 비율 곱하지 않고 그대로 합산)
         if checked_count == 3:
-            total_score = (mid_score * w_mid) + (final_score * w_final) + (perf_score * w_perf)
+            total_score = (mid_score * w_mid) + (final_score * w_final) + perf_score
             rounded_score = int(total_score + 0.5)
             grade = get_grade(total_score)
 
@@ -226,35 +240,46 @@ def main():
             """
             st.markdown(result_html, unsafe_allow_html=True)
 
-       
+        # Case B: 2개만 입력
         elif checked_count == 2:
             current_score = 0.0
-            target_weight = 0.0
+            target_type = ""  # "mid", "final", "perf" 구분
             target_name = ""
 
             if use_mid:
                 current_score += mid_score * w_mid
             else:
-                target_weight = w_mid
+                target_type = "mid"
                 target_name = TEXTS["mid_label"]
 
             if use_final:
                 current_score += final_score * w_final
             else:
-                target_weight = w_final
+                target_type = "final"
                 target_name = TEXTS["final_label"]
 
             if use_perf:
-                current_score += perf_score * w_perf
+                current_score += perf_score
             else:
-                target_weight = w_perf
-                target_name = TEXTS["perf_label"]
+                target_type = "perf"
+                target_name = perf_label_text
 
-            if target_weight <= 0:
+            # 미입력 과목의 만점 및 가중치 설정
+            if target_type == "mid":
+                target_weight = w_mid
+                target_max = 100.0
+            elif target_type == "final":
+                target_weight = w_final
+                target_max = 100.0
+            else:
+                target_weight = 1.0  # 수행평가는 점수 자체가 반영 점수이므로 가중치 1.0
+                target_max = max_perf_score
+
+            if (target_type == "mid" and w_mid <= 0) or (target_type == "final" and w_final <= 0) or (target_type == "perf" and max_perf_score <= 0):
                 st.markdown(f"<div class='plain-box'><b>{TEXTS['err_weight_zero']}</b></div>", unsafe_allow_html=True)
                 return
 
-            max_possible = current_score + (100.0 * target_weight)
+            max_possible = current_score + (target_max * target_weight)
             lines = [f"<b>{TEXTS['res_target_title'].format(target_name=target_name)}</b>"]
 
             for grade, cutoff in GRADE_CUTOFFS:
@@ -266,7 +291,7 @@ def main():
 
                 if needed <= 0:
                     lines.append(TEXTS["grade_already"].format(grade=grade, cut=cutoff))
-                elif needed > 100.0:
+                elif needed > target_max:
                     lines.append(TEXTS["grade_impossible"].format(grade=grade, cut=cutoff, max_possible=max_possible))
                 else:
                     lines.append(TEXTS["grade_achievable"].format(grade=grade, cut=cutoff, req_score=needed))
