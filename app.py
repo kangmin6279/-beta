@@ -15,7 +15,7 @@ SUBJECT_WEIGHTS = {
 
 TEXTS = {
     "page_title": "치이카와 성적 계산기(베타)",
-    "main_title": "한강민이 만든 성취도 계산기(베타)",
+    "main_title": "치이카와 성취도 계산기(베타)",
     "sub_title": "과목을 선택하고 점수를 입력하시오. (2개 이상 입력 시 목표 점수 계산)",
     "select_subject": "1. 과목 선택",
     "weight_info": "반영 비율: 중간 {mid}% / 기말 {final}% / 수행 {perf}%",
